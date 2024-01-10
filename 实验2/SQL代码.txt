@@ -1,0 +1,137 @@
+数据库初始化：
+CREATE TABLE users (
+    uid CHAR(3),
+    uname VARCHAR(20),
+    pwd VARCHAR(50)
+);
+CREATE TABLE album (
+    alid CHAR(3),
+    atitle VARCHAR(50),
+    arid CHAR(3),
+    genre VARCHAR(20),
+    lname VARCHAR(50),
+    adate DATE
+);
+CREATE TABLE collection (
+    uid CHAR(3),
+    alid CHAR(3)
+);
+CREATE TABLE artist (
+    arid CHAR(3),
+    aname VARCHAR(20),
+    atype CHAR(1)
+);
+CREATE TABLE song (
+    sid CHAR(3),
+    stitle VARCHAR(50),
+    duration INT,
+    alid CHAR(3),
+    tno INT
+);
+CREATE TABLE product (
+    alid CHAR(3),
+    pname VARCHAR(50),
+    pprice INT
+);
+CREATE TABLE label (
+    lname VARCHAR(50),
+    year INT
+);
+CREATE TABLE mv (
+    sid CHAR(3),
+    mtitle VARCHAR(50),
+    mdate DATE
+);
+CREATE TABLE event (
+    eid CHAR(3),
+    etitle VARCHAR(50),
+    eprice INT,
+    eaddr VARCHAR(50)
+);
+CREATE TABLE performance (
+    arid CHAR(3),
+    dt DATETIME,
+    eid CHAR(3)
+);
+
+导入数据：
+LOAD DATA LOCAL INFILE "D:\\Courses\\DB\\lab2\\txts\\album.txt" INTO TABLE album;
+
+添加主键约束：
+ALTER TABLE `music`.`album` 
+CHANGE COLUMN `alid` `alid` CHAR(3) NOT NULL ,
+ADD PRIMARY KEY (`alid`);
+
+添加外键约束：
+ALTER TABLE `music`.`album` 
+ADD INDEX `album-artist_idx` (`arid` ASC) VISIBLE;
+;
+ALTER TABLE `music`.`album` 
+ADD CONSTRAINT `album-artist`
+  FOREIGN KEY (`arid`)
+  REFERENCES `music`.`artist` (`arid`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION;
+  
+    
+添加索引：
+  ALTER TABLE `music`.`album` 
+ADD INDEX `album-title` (`atitle` ASC) VISIBLE;
+
+添加非空约束：
+ALTER TABLE `music`.`album` 
+CHANGE COLUMN `atitle` `atitle` VARCHAR(50) NOT NULL ;
+
+避免重复：
+ALTER TABLE `music`.`album` 
+ADD UNIQUE INDEX `alid_UNIQUE` (`alid` ASC) VISIBLE;
+
+创建视图：
+CREATE VIEW songinfo (Song , Artist , Album) AS
+    SELECT 
+        stitle, aname, atitle
+    FROM
+        song,
+        artist,
+        album
+    WHERE
+        song.arid = artist.arid
+            AND song.alid = album.alid;
+            
+插入条目：
+正常：
+insert into artist value ('005', 'A', 'M');
+重复
+insert into artist value ('001', 'A', 'M');
+空值
+insert into users value ('004', NULL, 2022-01-01);
+外键
+insert into collection value ('001', '010');
+删除：外键约束
+delete from artist where arid=001;
+
+连接查询：见视图
+
+嵌套查询：
+SELECT 
+    *
+FROM
+    product
+WHERE
+    alid IN (SELECT 
+            alid
+        FROM
+            album
+        WHERE
+            arid = 004);
+            
+分组查询：以查询时长大于43分钟的专辑及其时长为例
+SELECT 
+    atitle AS Album, SUM(duration) AS RunningTime
+FROM
+    album,
+    song
+WHERE
+    album.alid = song.alid
+GROUP BY song.alid
+HAVING SUM(duration) > 2580;

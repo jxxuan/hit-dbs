@@ -1,0 +1,4 @@
+001	vinyl	20
+004	ink-vinyl	30
+004	cd	15
+005	red-vinyl	35

@@ -1,0 +1,4 @@
+001	Bjork	F
+002	FKA twigs	F
+003	Kelela	F
+004	yeule	G
